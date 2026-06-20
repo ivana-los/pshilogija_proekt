@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoodLens – Wellbeing Journal</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="topnav">
+    <a class="logo-wrap" href="#">
+        <img src="logo.png" height="38" width="38" style="border-radius:10px;display:block;" alt="MoodLens logo"/>
+        <span class="logo-text">Mood<span>Lens</span></span>
+    </a>
+
+    <div class="nav-tabs">
+        <button class="nav-tab active"  onclick="showPage('home')"   ><i class="ti ti-home"     aria-hidden="true"></i> Home</button>
+        <button class="nav-tab"         onclick="showPage('stress')" ><i class="ti ti-brain"    aria-hidden="true"></i> Stress test</button>
+        <button class="nav-tab"         onclick="showPage('habits')" ><i class="ti ti-check"    aria-hidden="true"></i> Habits</button>
+        <button class="nav-tab"         onclick="showPage('tips')"   ><i class="ti ti-bulb"     aria-hidden="true"></i> Tips</button>
+        <button class="nav-tab"         onclick="showPage('history')"><i class="ti ti-calendar" aria-hidden="true"></i> History</button>
+    </div>
+
+    <div class="streak-badge">
+        <i class="ti ti-flame" aria-hidden="true"></i>
+        <span id="streakCount">0</span> days
+    </div>
+</nav>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<div class="page active" id="page-home">
+
+    <div class="stats-grid">
+        <div class="stat-card" style="background:var(--purple-light);color:var(--purple);">
+            <div class="stat-label">Average mood</div>
+            <div class="stat-val" id="avgMood">–</div>
+            <div class="stat-sub">this week</div>
+        </div>
+        <div class="stat-card" style="background:var(--teal-light);color:var(--teal);">
+            <div class="stat-label">Habits today</div>
+            <div class="stat-val" id="habitsToday">0/8</div>
+            <div class="stat-sub">completed</div>
+        </div>
+        <div class="stat-card" style="background:var(--amber-light);color:var(--amber);">
+            <div class="stat-label">Entries this week</div>
+            <div class="stat-val" id="weekEntries">0</div>
+            <div class="stat-sub">days tracked</div>
+        </div>
+        <div class="stat-card" style="background:var(--green-light);color:var(--green);">
+            <div class="stat-label">Stress level</div>
+            <div class="stat-val" id="lastStress">–</div>
+            <div class="stat-sub">last test</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title"><i class="ti ti-chart-line" aria-hidden="true"></i> Mood this week</div>
+        <div class="chart-wrap" id="moodChart">
+            <div class="empty" style="flex:1;padding:20px 0;font-size:13px;color:var(--text-muted);">
+                No data yet. Log today's mood!
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title"><i class="ti ti-mood-smile" aria-hidden="true"></i> How are you feeling today?</div>
+
+        <div class="mood-grid" id="moodGrid">
+            <div class="mood-btn" onclick="selectMood(this, 1)" data-val="1"><div class="mood-emoji">😢</div><div class="mood-label">Very bad</div></div>
+            <div class="mood-btn" onclick="selectMood(this, 2)" data-val="2"><div class="mood-emoji">😕</div><div class="mood-label">Not great</div></div>
+            <div class="mood-btn" onclick="selectMood(this, 3)" data-val="3"><div class="mood-emoji">😐</div><div class="mood-label">Okay</div></div>
+            <div class="mood-btn" onclick="selectMood(this, 4)" data-val="4"><div class="mood-emoji">🙂</div><div class="mood-label">Good</div></div>
+            <div class="mood-btn" onclick="selectMood(this, 5)" data-val="5"><div class="mood-emoji">😄</div><div class="mood-label">Great</div></div>
+        </div>
+
+        <div class="slider-row">
+            <div class="slider-header">
+                <span class="slider-label"><i class="ti ti-moon" aria-hidden="true"></i> Hours of sleep</span>
+                <span class="slider-val" id="sleepVal">7 hrs</span>
+            </div>
+            <input type="range" min="3" max="12" value="7" step="0.5" id="sleepSlider"
+                   oninput="document.getElementById('sleepVal').textContent=this.value+' hrs'">
+        </div>
+
+        <div class="slider-row">
+            <div class="slider-header">
+                <span class="slider-label"><i class="ti ti-bolt" aria-hidden="true"></i> Energy</span>
+                <span class="slider-val" id="energyVal">5/10</span>
+            </div>
+            <input type="range" min="1" max="10" value="5" id="energySlider"
+                   oninput="document.getElementById('energyVal').textContent=this.value+'/10'">
+        </div>
+
+        <div class="slider-row">
+            <div class="slider-header">
+                <span class="slider-label"><i class="ti ti-activity" aria-hidden="true"></i> Stress level</span>
+                <span class="slider-val" id="stressVal">3/10</span>
+            </div>
+            <input type="range" min="1" max="10" value="3" id="stressSlider"
+                   oninput="document.getElementById('stressVal').textContent=this.value+'/10'">
+        </div>
+
+        <div style="margin-bottom:14px;">
+            <div style="font-size:13px;font-weight:500;margin-bottom:6px;"><i class="ti ti-pencil" aria-hidden="true"></i> Notes (optional)</div>
+            <textarea id="noteInput" placeholder="Write something about today... What made you happy? What was tough?"></textarea>
+        </div>
+
+        <div style="font-size:13px;font-weight:500;margin-bottom:8px;"><i class="ti ti-tag" aria-hidden="true"></i> Tag your day:</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;" id="tagArea">
+            <span class="tag" style="background:#EDE9FE;color:#6D28D9;" onclick="toggleTag(this,'school')">🏫 School</span>
+            <span class="tag" style="background:#DCFCE7;color:#15803D;" onclick="toggleTag(this,'sport')">🏃 Sport</span>
+            <span class="tag" style="background:#DBEAFE;color:#1D4ED8;" onclick="toggleTag(this,'friends')">👫 Friends</span>
+            <span class="tag" style="background:#FEF3C7;color:#B45309;" onclick="toggleTag(this,'family')">🏠 Family</span>
+            <span class="tag" style="background:#FFE4E6;color:#BE123C;" onclick="toggleTag(this,'stress')">😓 Stress</span>
+            <span class="tag" style="background:#F0FDF4;color:#15803D;" onclick="toggleTag(this,'happiness')">✨ Happy</span>
+            <span class="tag" style="background:#FEE2E2;color:#DC2626;" onclick="toggleTag(this,'tired')">😴 Tired</span>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;">
+            <button class="btn btn-primary" onclick="saveEntry()">
+                <i class="ti ti-device-floppy" aria-hidden="true"></i> Save day
+            </button>
+        </div>
+    </div>
+
+
+
+</div>
+
+<div class="page" id="page-stress">
+    <div class="section-title">Stress test</div>
+    <div class="section-sub">Answer 6 questions to check your current stress level.</div>
+
+    <div class="card">
+        <div id="stressQuestions"></div>
+        <div style="display:flex;justify-content:flex-end;margin-top:8px;">
+            <button class="btn btn-primary" onclick="calcStress()">
+                Check result <i class="ti ti-arrow-right" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="stress-result" id="stressResult">
+            <div class="stress-score" id="stressScore"></div>
+            <div class="stress-level" id="stressLevelLabel"></div>
+            <div class="stress-tips"  id="stressTipsText"></div>
+        </div>
+    </div>
+</div>
+
+<div class="page" id="page-habits">
+    <div class="section-title">Daily habits</div>
+    <div class="section-sub">Check off the habits you completed today. Goal: 8/8!</div>
+
+    <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <div>
+                <div style="font-size:13px;color:var(--text-muted);">Completed today</div>
+                <div style="font-size:24px;font-weight:800;color:var(--green);" id="habitProgress">0 / 8</div>
+            </div>
+            <div class="progress-bar" style="width:180px;">
+                <div class="progress-fill" id="habitBar" style="width:0%;background:var(--green);"></div>
+            </div>
+        </div>
+        <div class="habits-grid" id="habitsGrid"></div>
+    </div>
+
+    <div class="card">
+        <div class="card-title"><i class="ti ti-chart-bar" aria-hidden="true"></i> This week</div>
+        <div id="weeklyHabits" style="font-size:13px;color:var(--text-muted);">Not enough data yet.</div>
+    </div>
+</div>
+
+<div class="page" id="page-tips">
+    <div class="section-title">Wellbeing tips</div>
+    <div class="section-sub">Practical tips based on HBSC research on youth health.</div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;" id="tipFilters">
+        <button class="btn btn-sm btn-outline" style="border-color:var(--purple);color:var(--purple);" onclick="filterTips('all', this)">All</button>
+        <button class="btn btn-sm btn-outline" onclick="filterTips('mental',   this)"><i class="ti ti-brain"      aria-hidden="true"></i> Mental</button>
+        <button class="btn btn-sm btn-outline" onclick="filterTips('physical', this)"><i class="ti ti-run"        aria-hidden="true"></i> Physical</button>
+        <button class="btn btn-sm btn-outline" onclick="filterTips('sleep',    this)"><i class="ti ti-moon"       aria-hidden="true"></i> Sleep</button>
+        <button class="btn btn-sm btn-outline" onclick="filterTips('social',   this)"><i class="ti ti-users"      aria-hidden="true"></i> Social</button>
+        <button class="btn btn-sm btn-outline" onclick="filterTips('digital',  this)"><i class="ti ti-device-mobile" aria-hidden="true"></i> Digital</button>
+    </div>
+
+    <div id="tipsContainer"></div>
+</div>
+
+<div class="page" id="page-history">
+    <div class="section-title">History</div>
+    <div class="section-sub">Your previous entries.</div>
+
+    <div class="card" id="historyContainer">
+        <div class="empty">
+            <div class="empty-icon">📖</div>
+            <div class="empty-text">No entries yet. Start by logging today's mood!</div>
+        </div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+<script src="tips.js"></script>
+<script src="stress.js"></script>
+<script src="habits.js"></script>
+<script>
+    renderStressQuestions();
+    renderHabits();
+    renderTips();
+    renderChart();
+    renderStats();
+    renderDailyTip();
+    document.getElementById('streakCount').textContent = state.streak;
+</script>
+
+</body>
+</html>
